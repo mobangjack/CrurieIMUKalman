@@ -1,7 +1,5 @@
 #include "kalman.h"
 
-#define SQR(x) (x*x)
-
 struct Kalman* KalmanCreate()
 {
   Kalman* kalman = (Kalman*)malloc(sizeof(Kalman));
@@ -43,10 +41,10 @@ float KalmanFilter(struct Kalman* kalman, float x) {
   kalman->e += kalman->d;
   kalman->p += kalman->q;
   // fusion
-  kalman->k = (1 + kalman->r / kalman->p); // kalman gain
-  kalman->d = (x - kalman->e) / kalman->k; // delta mean
+  kalman->k = kalman->p / (kalman->p + kalman->r); // kalman gain
+  kalman->d = (x - kalman->e) * kalman->k; // delta mean
   kalman->e += kalman->d;                  // fused mean
-  kalman->p -= SQR(kalman->p) / kalman->k; // fused variance
+  kalman->p -= kalman->p * kalman->k; // fused variance
   return kalman->e;
 }
 
